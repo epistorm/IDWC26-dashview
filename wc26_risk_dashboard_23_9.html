@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC26 Infectious Disease Risk Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#edf3f8;--bg2:#e0ecf4;--bg3:#c8d8e4;--card:#fff;--tx:#0a1419;--tx2:#2d3d4a;--tx3:#516573;--bd:rgba(0,0,0,.08);--t50:#e1f5ee;--t100:#9fe1cb;--t200:#5ec49e;--t400:#1d9e75;--t600:#0f6e56;--t800:#085041;--t900:#04342c;--a50:#faeeda;--a100:#fac775;--a400:#ef9f27;--a600:#ba7517;--a800:#633806;--a900:#412402;--amb-tag:#efab3b;--b50:#deedfb;--b800:#0c447c;--co:#d85a30;--map-fill:#dde5e8;--tx4:#7e8f9c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--t600);text-decoration:none}a:hover{text-decoration:underline}
+.d{max-width:1200px;margin:0 auto;padding:28px 28px 40px}
+.hd{margin-bottom:0;display:flex;align-items:center;gap:16px;background:var(--card);border:0.5px solid var(--bd);border-radius:2px;padding:24px 30px}
+.hd-left{display:flex;align-items:center;gap:10px;flex:1}
+.hd-doctype{font-size:11px;color:var(--tx3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
+.hd-text{flex:1}
+.ht{font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:500;letter-spacing:-.3px;line-height:1.2;margin-bottom:5px;color:var(--tx)}
+.ht em{font-style:normal;color:#2b2d5e}
+.hs{font-size:14px;color:var(--tx3);font-style:normal}
+.hs a{color:var(--t600)}
+.hd-logo{flex-shrink:0;text-align:right;text-decoration:none;display:block}
+.hd-logo:hover{text-decoration:none;opacity:.85}
+.tabs{display:flex;gap:0;background:var(--card);border-left:0.5px solid var(--bd);border-right:0.5px solid var(--bd);border-bottom:1.5px solid var(--bg3);margin-bottom:18px}
+.tab{padding:10px 18px;font-size:14px;font-family:system-ui,-apple-system,sans-serif;font-weight:500;letter-spacing:.01em;border:none;cursor:pointer;background:none;color:var(--tx3);position:relative;transition:color .15s;white-space:nowrap}
+.tab:hover{color:var(--tx2)}.tab.on{color:var(--t800)}
+.tab.on::after{content:'';position:absolute;bottom:-1.5px;left:0;right:0;height:2px;background:var(--t400);border-radius:1px}
+.view{display:none}.view.active{display:block}
+.mn{display:grid;grid-template-columns:1fr 370px;gap:18px;align-items:start}
+@media(max-width:920px){.mn{grid-template-columns:1fr}}
+.mw{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:2px;overflow:hidden}
+.mw svg{display:block;width:100%}
+.state-p{fill:var(--map-fill);stroke:rgba(0,0,0,.05);stroke-width:.5}
+.country-p{fill:var(--map-fill);stroke:rgba(0,0,0,.04);stroke-width:.3}
+.leg{margin-top:7px}
+.lr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.lr+.lr{margin-top:3px}
+.ll{font-size:11px;color:var(--tx3);font-style:normal}
+.li{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--tx2)}
+.ls{width:10px;height:10px;border-radius:2px;border:.5px solid rgba(0,0,0,.06)}
+.sp{background:var(--card);border:1px solid var(--bd);border-radius:2px;overflow:hidden;display:flex;flex-direction:column;max-height:620px}
+.sp-top{padding:0;background:none;border-bottom:0.5px solid var(--bd);display:flex;gap:0}
+.sp-box{flex:1;text-align:center;padding:10px 14px}
+.sp-box+.sp-box{border-left:0.5px solid var(--bd)}
+.sp-box-l{font-size:11px;color:var(--tx3);display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.3px}
+.sp-box-l .ii{width:13px;height:13px;font-size:8px}
+.sp-box-v{font-size:30px;font-family:Georgia,serif;font-weight:500;color:var(--t800)}
+.sp-box-v.am{color:var(--t400)}
+.sp-box-v .sub48{font-size:15px;color:var(--tx3)}
+.sp-body{padding:14px;overflow-y:auto;flex:1}
+.sp-body::-webkit-scrollbar{width:3px}.sp-body::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+.ph{display:flex;align-items:baseline;gap:6px;margin-bottom:0;flex-wrap:wrap;padding-bottom:8px;border-bottom:0.5px solid var(--bd)}
+.pt{font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:500;color:var(--tx)}
+.ps{font-size:11px;color:var(--tx3);font-style:normal}
+.pm{font-size:11px;color:var(--tx3);font-style:normal;margin-bottom:10px;line-height:1.45;padding-top:4px}
+.sl{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;margin-top:10px;display:flex;align-items:center;gap:4px}
+.tc{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:2px;font-size:12px;background:var(--bg);color:var(--tx);border:.5px solid var(--bg3);font-weight:500}
+.cd{width:6px;height:6px;border-radius:50%}.gt{font-size:10px;color:var(--tx3);font-style:normal}
+.rcs{display:flex;flex-direction:column;gap:3px}
+.rcs .rc.pri{margin-bottom:4px}
+.rcs .rc.pri+.rc:not(.pri){margin-top:2px}
+.rc{padding:6px 11px;border-radius:2px;background:none;border:none;border-left:3px solid transparent}
+.rc.pri{padding:9px 11px;background:rgba(239,171,59,.12);border-left:3px solid var(--amb-tag)}
+.rch{display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap}
+.rcn{font-size:14px;font-weight:500;color:var(--tx)}
+.rc:not(.pri) .rcn{color:var(--tx3);font-weight:normal;font-size:12px}
+.rc:not(.pri) .rcf{color:var(--tx3)}
+.rc:not(.pri) .rl{color:var(--tx4);font-weight:normal}
+.rc:not(.pri) .rcno{color:var(--tx3)}
+.rct{font-size:10px;color:var(--tx3);font-style:normal;margin-left:auto}
+.ptag{display:inline-block;padding:2px 6px;border-radius:2px;font-size:9px;font-weight:500;letter-spacing:.3px;background:var(--amb-tag);color:var(--a900);font-family:system-ui,sans-serif;text-transform:uppercase}
+.rcf{font-size:12px;color:var(--a900);font-style:normal;margin-bottom:3px;font-weight:500}
+.rr{display:flex;gap:3px;align-items:center;flex-wrap:nowrap;margin-bottom:3px}
+.rl{font-size:10px;color:var(--tx2);font-weight:500}
+.rb{display:inline-block;padding:2px 5px;border-radius:2px;font-size:9px;font-weight:500;font-family:system-ui,sans-serif;line-height:13px}
+.r-unlikely{background:#f0efea;color:#8a8880}
+.r-possible{background:#c8e6d9;color:var(--t800)}
+.r-likely{background:var(--t400);color:#fff}
+.r-uncertain{background:var(--b50);color:var(--b800)}
+.rcno{font-size:11px;color:var(--tx2);font-style:normal;margin-top:2px;line-height:1.4}
+.ndm{font-size:12px;color:var(--tx3);font-style:normal}
+.cbdg{display:inline-block;padding:2px 7px;border-radius:3px;font-size:11px;font-family:system-ui,sans-serif}
+.ref-link{font-size:9px;color:var(--t600);font-style:normal;font-family:system-ui,sans-serif;margin-left:2px;opacity:.7}.ref-link:hover{opacity:1}
+.tt{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--bd);border-radius:2px;padding:8px 11px;max-width:250px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06);font-size:12px;opacity:0;transition:opacity .1s}
+.tt.vis{opacity:1}
+.ttt{font-family:Georgia,'Times New Roman',serif;font-weight:500;font-size:14px;color:var(--tx);margin-bottom:1px}
+.tts{font-size:11px;color:var(--tx3);font-style:normal}
+.ttst{font-size:11px;color:var(--tx2);margin-top:2px}
+.tth{font-size:10px;color:var(--tx3);margin-top:3px;font-style:normal}
+.ttp{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+.pp{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:2px;font-size:11px;font-weight:500;background:var(--amb-tag);color:var(--a900);font-family:system-ui,sans-serif}
+.ppd{display:none}
+.pref{margin-top:10px;padding:10px 14px;border-radius:2px;background:rgba(239,171,59,.05);border:.5px solid rgba(239,171,59,.15)}
+.pref-t{font-size:12px;font-weight:500;color:var(--a800);font-style:normal;margin-bottom:5px}
+.pref-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px}
+.pref-n{font-size:11px;color:var(--tx4);font-style:normal;line-height:1.5}
+.footer{font-size:11px;color:var(--tx4);text-align:left;margin-top:14px;padding-top:10px;border-top:0.5px solid var(--bd);font-style:normal;line-height:1.6}
+.ii{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--tx3);font-size:10px;font-style:italic;font-family:Georgia,serif;color:var(--tx3);cursor:pointer;position:relative;flex-shrink:0;line-height:1;user-select:none}
+.ii:hover{border-color:var(--tx2);color:var(--tx2)}
+.ip{display:none;position:absolute;top:22px;left:-4px;width:290px;background:var(--card);border:1px solid var(--bd);border-radius:2px;padding:10px 12px;font-size:12px;font-style:normal;color:var(--tx2);line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.06);z-index:200;cursor:default}
+.ip.rt{left:auto;right:-4px}.ii.open .ip{display:block}
+.ipt{font-weight:bold;font-size:12px;color:var(--tx);margin-bottom:3px}
+.atbl{width:100%;border-collapse:collapse;font-size:13px}
+.atbl th{text-align:left;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;padding:7px 8px;border-bottom:1.5px solid var(--bg3);font-weight:normal;font-style:normal;position:sticky;top:0;background:var(--bg)}
+.atbl th .ii{vertical-align:middle;margin-left:2px}
+.atbl td{padding:6px 8px;border-bottom:none;vertical-align:top}
+.atbl tr:nth-child(even) td{background:rgba(0,0,0,.015)}
+.atbl tr.pri-row td{background:rgba(239,171,59,.04)}
+.atbl .pname{font-weight:bold;white-space:nowrap}
+.atbl .notes-cell{font-size:12px;color:var(--tx2);font-style:normal;line-height:1.4;max-width:340px}
+.asep td{padding:8px;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bg3);background:var(--bg2)}
+.mtbl{width:100%;border-collapse:collapse;font-size:12px}
+.mtbl th{text-align:left;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;padding:6px 6px;border-bottom:1.5px solid var(--bg3);font-weight:normal;font-style:normal;position:sticky;top:0;background:var(--bg)}
+.mtbl td{padding:5px 6px;border-bottom:none;vertical-align:top}
+.mtbl .grp-sep td{padding:6px;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bg3);background:var(--bg2)}
+.mtbl .tname{font-weight:bold;white-space:nowrap}
+.city-tag{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:var(--bg);margin:1px 2px;font-family:system-ui,sans-serif}
+.flag-mini{display:inline-block;padding:2px 5px;border-radius:3px;font-size:9px;font-family:system-ui,sans-serif;margin:1px 1px}
+.flag-mini.pri{background:var(--a50);color:var(--a800);border:.5px solid var(--a100)}
+.flag-mini.std{background:#eaeceb;color:var(--tx2)}
+.scroll-wrap{max-height:560px;overflow-y:auto;background:var(--card);border:1px solid var(--bd);border-radius:2px;padding:2px}
+.scroll-wrap::-webkit-scrollbar{width:3px}.scroll-wrap::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px}
+.tab-intro{font-size:13px;color:var(--tx2);font-style:normal;margin-bottom:12px;line-height:1.6}
+.about-wrap{background:var(--card);border:1px solid var(--bd);border-radius:2px;padding:28px 32px;max-width:820px;line-height:1.7}
+.about-wrap h2{font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:500;color:var(--tx);margin:24px 0 10px;padding-top:18px;border-top:1px solid var(--bd)}.about-wrap h2:first-child{margin-top:0;padding-top:0;border-top:none}
+.about-wrap p{font-size:13px;color:var(--tx2);margin-bottom:10px}
+.about-wrap ul{font-size:13px;color:var(--tx2);margin:0 0 12px 18px}.about-wrap li{margin-bottom:3px}
+.about-wrap .center-name{font-weight:bold;color:var(--tx)}.about-wrap .center-inst{color:var(--tx3);font-style:normal;font-size:12px}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin:10px 0 16px}
+@media(max-width:600px){.about-grid{grid-template-columns:1fr}}
+.about-grid .cg-item{font-size:13px;padding:6px 0;border-bottom:.5px solid var(--bd)}
+.rating-key{display:inline-flex;gap:6px;align-items:center;margin:2px 0}
+.htr-card{background:var(--card);border:1px solid var(--bd);border-radius:2px;padding:20px 24px;margin-bottom:14px}
+.htr-stitle{display:flex;align-items:center;margin-bottom:6px}
+.htr-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#2b2d5e;color:#fff;font-size:11px;font-family:system-ui,sans-serif;font-weight:500;margin-right:8px;flex-shrink:0}
+.htr-h{font-family:Georgia,'Times New Roman',serif;font-size:16px;color:var(--tx)}
+.htr-p{font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:8px}
+.htr-note{font-size:12px;color:var(--tx3);font-style:normal;line-height:1.5;margin-top:6px}
+.htr-dots{display:flex;gap:14px;align-items:flex-end;margin:6px 0}
+.htr-dot-i{text-align:center}
+.htr-dot{border-radius:50%;border:.5px solid rgba(0,0,0,.06);margin:0 auto 3px}
+.htr-dot-l{font-size:10px;color:var(--tx3)}
+.htr-match{background:var(--bg);border:.5px solid var(--bd);border-radius:2px;padding:10px 12px;margin:8px 0;font-size:12px}
+.htr-match-t{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.htr-match-i{display:flex;align-items:center;gap:6px;padding:4px 0}
+.htr-match-i+.htr-match-i{border-top:.5px solid var(--bd)}
+.htr-md{color:var(--t600);font-weight:bold;font-family:system-ui,sans-serif;font-size:11px;min-width:48px}
+.htr-mt{color:var(--tx);flex:1}
+.htr-mtm{color:var(--tx3);font-size:11px;font-style:normal}
+.htr-rc{border-radius:2px;padding:10px 12px;background:rgba(239,171,59,.07);border-left:3px solid var(--amb-tag);border-top:none;border-right:none;border-bottom:none;margin:8px 0;font-size:13px}
+.htr-rc-h{display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap}
+.htr-rc-n{font-weight:bold;color:var(--tx);font-size:13px}
+.htr-rc-f{font-size:11px;color:var(--a800);font-style:normal;margin-bottom:3px}
+.htr-rc-ref{font-size:9px;color:var(--t600);font-family:system-ui,sans-serif}
+.htr-rc-badges{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:3px}
+.htr-rc-rl{font-size:10px;color:var(--tx3)}
+.htr-rc-note{font-size:12px;color:var(--tx2);font-style:normal}
+.htr-ann{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;font-size:12px;color:var(--tx2);line-height:1.5}
+.htr-ann strong{color:var(--t600)}
+.htr-conf{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
+.htr-conf-i{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2)}
+.htr-conf-d{width:14px;height:14px;border-radius:50%}
+.htr-dont{background:rgba(226,75,74,.03);border:.5px solid rgba(226,75,74,.12);border-radius:2px;padding:12px 16px;margin:6px 0;font-size:12px;color:var(--tx2);line-height:1.6}
+.match-box{background:var(--bg);border:.5px solid var(--bg3);border-radius:2px;padding:9px 11px;margin-bottom:12px}
+.match-box-title{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.match-box-title svg{width:13px;height:13px;flex-shrink:0}
+.match-item{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:13px}
+.match-item+.match-item{border-top:.5px solid var(--bd)}
+.match-date{color:var(--t600);font-weight:500;font-family:system-ui,sans-serif;font-size:12px;min-width:50px;flex-shrink:0}
+.match-teams{color:var(--tx);flex:1;font-weight:500}
+.match-time{color:var(--tx3);font-size:12px;font-style:normal;flex-shrink:0}
+.match-stage{font-size:10px;color:var(--tx3);font-style:normal}
+.match-city{font-size:10px;color:var(--t600);font-style:normal}
+.tt-match{font-size:11px;color:var(--t600);margin-top:3px;border-top:.5px solid var(--bd);padding-top:3px}
+</style>
+</head>
+<body>
+<div class="d">
+  <div class="hd">
+    <div class="hd-left">
+      <div class="hd-text">
+        <div class="hd-doctype">Infectious disease risk assessment</div>
+        <div class="ht">FIFA World Cup 2026: host city pathogen profiles</div>
+        <div class="hs">Version 2.3 &mdash; Updated April 29, 2026</div>
+      </div>
+    </div>
+    <a href="https://insightnet.us/" target="_blank" class="hd-logo"><svg viewBox="0 0 240 52" width="240" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="120" y="24" text-anchor="middle" font-family="'Nunito',system-ui,sans-serif" font-size="26" font-weight="800" fill="#2b2d5e" letter-spacing="-0.5">Insight Net</text><line x1="30" y1="32" x2="210" y2="32" stroke="#1d9e75" stroke-width="1.5" stroke-linecap="round"/><text x="120" y="46" text-anchor="middle" font-family="'Nunito',system-ui,sans-serif" font-size="7.5" fill="#5f5e5a" letter-spacing="0.2">National Outbreak Analytics &amp; Disease Modeling Network</text></svg></a>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="view active" id="v-us"></div>
+  <div class="view" id="v-world"></div>
+  <div class="view" id="v-assess"></div>
+  <div class="view" id="v-map"></div>
+  <div class="view" id="v-about"></div>
+  <div class="view" id="v-howto"></div>
+  <div class="footer">EPISTORM Center, Laboratory for the Modeling of Biological and Socio-technical Systems, Northeastern University. Supported by CDC-RFA-FT-23-0069 (Center for Forecasting and Outbreak Analytics). Surveillance data: WHO, ECDC, PAHO, national authorities. Findings do not represent the official position of the funding agencies.</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const PP=["Dengue","Measles","Mpox Clade I","Norovirus","Novel Respiratory Viruses","Oropouche"];
+function np(p){const l=p.toLowerCase();if(l.includes("mpox")&&(l.includes("clade i")||l.includes("clade 1"))){if(l.includes("clade ii")||l.includes("clade 2"))return"Mpox Clade II";return"Mpox Clade I"}if(l.includes("mpox"))return"Mpox (unspecified)";if(l.includes("chikungunya"))return"Chikungunya";if(l.includes("oropouche")||l.includes("oropuche"))return"Oropouche";if(l.includes("mers"))return"MERS-CoV";if(l.includes("dengue"))return"Dengue";if(l.includes("measles"))return"Measles";if(l.includes("ebola"))return"Ebola";if(l.includes("marburg"))return"Marburg";if(l.includes("cholera"))return"Cholera";if(l.includes("yellow fever"))return"Yellow Fever";if(l.includes("west nile"))return"West Nile Virus";if(l.includes("tick-borne enceph")||l==="tbe")return"TBE";if(l.includes("crimean")||l.includes("cchf"))return"CCHF";if(l.includes("nipah"))return"Nipah";if(l.includes("zika"))return"Zika";if(l.includes("seasonal arbo")||l.includes("mediterranean arbo")||l.includes("emerging arbo"))return"Seasonal Arboviruses";return p}
+function isP(n){return PP.some(p=>n.toLowerCase().includes(p.toLowerCase()))}
+const TNM={"Czech Republic":"Czechia","Turkey":"T\u00fcrkiye","DRC":"DR Congo"};function rt(t){return TNM[t]||t}
+
+const REFS={"Ivory Coast|Mpox clade II":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Ivory Coast|Yellow fever":"https://www.who.int/news-room/fact-sheets/detail/yellow-fever","Ivory Coast|Dengue":"https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue","Australia|Dengue":"https://www.health.gov.au/diseases/dengue-virus-infection","Cura\u00e7ao|Dengue":"https://www.paho.org/en/topics/dengue","Jordan|MERS-CoV":"https://www.who.int/news-room/fact-sheets/detail/middle-east-respiratory-syndrome-coronavirus-(mers-cov)","Uzbekistan|Crimean-Congo Haemorrhagic Fever (CCHF)":"https://www.ecdc.europa.eu/en/crimean-congo-haemorrhagic-fever/surveillance-and-disease-data","New Zealand|Dengue":"https://beaconbio.org/en/report/?reportid=7a232b34-590f-4c6f-9dc0-37920767f05e","New Zealand|Measles":"https://www.phfscience.nz/digital-library/measles-dashboard/","Germany|West Nile Virus (WNV)":"https://www.ecdc.europa.eu/en/west-nile-fever/surveillance-and-disease-data/historical","Germany|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Germany|Measles":"https://www.ecdc.europa.eu/en/measles/surveillance-and-disease-data","Netherlands|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Netherlands|Measles":"https://www.ecdc.europa.eu/en/measles/surveillance-and-disease-data","Switzerland|Tick-borne Encephalitis (TBE)":"https://www.ecdc.europa.eu/en/tick-borne-encephalitis/surveillance-and-disease-data","Switzerland|Measles":"https://www.ecdc.europa.eu/en/measles/surveillance-and-disease-data","Croatia|West Nile Virus (WNV)":"https://www.ecdc.europa.eu/en/west-nile-fever/surveillance-and-disease-data/historical","Croatia|Tick-borne Encephalitis (TBE)":"https://www.ecdc.europa.eu/en/tick-borne-encephalitis/surveillance-and-disease-data","Scotland|Measles":"https://www.publichealthscotland.scot/our-areas-of-work/conditions-and-diseases/measles/","Norway|Tick-borne Encephalitis (TBE)":"https://www.ecdc.europa.eu/en/tick-borne-encephalitis/surveillance-and-disease-data","Sweden|Tick-borne Encephalitis (TBE)":"https://www.ecdc.europa.eu/en/tick-borne-encephalitis/surveillance-and-disease-data","Sweden|Measles":"https://www.ecdc.europa.eu/en/measles/surveillance-and-disease-data","Bosnia and Herzegovina|West Nile Virus (WNV)":"https://www.ecdc.europa.eu/en/west-nile-fever/surveillance-and-disease-data/historical","T\u00fcrkiye|Crimean-Congo Haemorrhagic Fever (CCHF)":"https://www.ecdc.europa.eu/en/crimean-congo-haemorrhagic-fever/surveillance-and-disease-data","T\u00fcrkiye|West Nile Virus (WNV)":"https://www.ecdc.europa.eu/en/west-nile-fever/surveillance-and-disease-data/historical","Colombia|Chikungunya":"https://www.paho.org/en/topics/chikungunya","Colombia|Oropouche":"https://www.paho.org/en/topics/oropouche","Colombia|Yellow fever":"https://www.paho.org/en/epidemiological-alerts-and-updates","France|Chikungunya":"https://www.ecdc.europa.eu/en/chikungunya/surveillance-and-disease-data","Brazil|Chikungunya":"https://www.paho.org/en/topics/chikungunya","Brazil|Measles":"https://www.paho.org/en/topics/measles","Paraguay|Chikungunya ECSA genotype":"https://www.paho.org/en/topics/chikungunya","Haiti|Cholera":"https://www.paho.org/en/topics/cholera","Cape Verde|Dengue":"https://www.ecdc.europa.eu/en/dengue-fever/surveillance-and-disease-data","Cape Verde|Emerging arboviruses":"https://www.ecdc.europa.eu/en/dengue-fever/surveillance-and-disease-data","Ecuador|Dengue":"https://www.paho.org/en/topics/dengue","Ecuador|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","DR Congo|Ebola":"https://www.who.int/emergencies/disease-outbreak-news","DR Congo|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Ghana|Marburg":"https://www.who.int/news-room/fact-sheets/detail/marburg-virus-disease","Ghana|Mpox clade II":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Japan|Measles":"https://www.niid.go.jp/niid/en/measles-e.html","Canada|Measles":"https://health-infobase.canada.ca/measles-rubella/","Canada|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Tunisia|Mediterranean arbovirus risk":"https://www.ecdc.europa.eu/en/dengue-fever/surveillance-and-disease-data","Egypt|MERS-CoV":"https://www.who.int/news-room/fact-sheets/detail/middle-east-respiratory-syndrome-coronavirus-(mers-cov)","Egypt|Seasonal arboviruses":"https://www.ecdc.europa.eu/en/rift-valley-fever/surveillance-and-disease-data","Iraq|MERS-CoV":"https://www.who.int/news-room/fact-sheets/detail/middle-east-respiratory-syndrome-coronavirus-(mers-cov)","Saudi Arabia|MERS-CoV":"https://www.who.int/news-room/fact-sheets/detail/middle-east-respiratory-syndrome-coronavirus-(mers-cov)","Iran|MERS-CoV circulation":"https://www.who.int/news-room/fact-sheets/detail/middle-east-respiratory-syndrome-coronavirus-(mers-cov)","Senegal|Mpox":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","South Africa|Mpox clade I":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Qatar|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Portugal|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","England|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Belgium|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Austria|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Czechia|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Spain|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Argentina|Mpox clade Ib":"https://worldhealthorg.shinyapps.io/mpx_global/#sec-global","Argentina|Seasonal arbovirus":"https://www.paho.org/en/topics/dengue","Panama|Oropuche":"https://www.paho.org/en/topics/oropouche","Uruguay|Seasonal arbovirus":"https://www.paho.org/en/topics/dengue","Morocco|Seasonal arbovirus":"https://www.ecdc.europa.eu/en/dengue-fever/surveillance-and-disease-data","Algeria|Seasonal arbovirus":"https://www.ecdc.europa.eu/en/dengue-fever/surveillance-and-disease-data","Mexico|Dengue":"https://www.gob.mx/salud/documentos/panorama-epidemiologico-de-dengue","Mexico|Zika":"https://www.paho.org/en/topics/zika","Mexico|Oropouche":"https://www.paho.org/en/topics/oropouche","Mexico|Chikungunya":"https://www.paho.org/en/topics/chikungunya"};
+
+const RR=[
+{t:"Ivory Coast",y:"Orthopoxvirus",p:"Mpox clade II",n:"West Africa outbreak ongoing."},{t:"Ivory Coast",y:"Arbovirus",p:"Yellow fever",n:"Endemic; vaccination required."},{t:"Ivory Coast",y:"Arbovirus",p:"Dengue",n:"Endemic year-round."},{t:"Australia",y:"Arbovirus",p:"Dengue",n:"Imported cases. No outbreak Apr 2026."},{t:"Cura\u00e7ao",y:"Arbovirus",p:"Dengue",n:"Caribbean endemic."},{t:"Jordan",y:"Respiratory/Zoonotic",p:"MERS-CoV",n:"MERS endemic. Sporadic."},{t:"Uzbekistan",y:"VHF",p:"Crimean-Congo Haemorrhagic Fever (CCHF)",n:"CCHF endemic."},{t:"New Zealand",y:"Arbovirus",p:"Dengue",n:"142 imported cases Feb 2026."},{t:"New Zealand",y:"VPD",p:"Measles",n:"Low incidence Apr 2026."},{t:"Germany",y:"Arbovirus",p:"West Nile Virus (WNV)",n:"Established since 2018."},{t:"Germany",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"European cluster."},{t:"Germany",y:"VPD",p:"Measles",n:"Sporadic."},{t:"Netherlands",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"European cluster."},{t:"Netherlands",y:"VPD",p:"Measles",n:"Sporadic."},{t:"Switzerland",y:"Arbovirus",p:"Tick-borne Encephalitis (TBE)",n:"Endemic."},{t:"Switzerland",y:"VPD",p:"Measles",n:"Sporadic."},{t:"Croatia",y:"Arbovirus",p:"West Nile Virus (WNV)",n:"Endemic since 2012."},{t:"Croatia",y:"Arbovirus",p:"Tick-borne Encephalitis (TBE)",n:"Present."},{t:"Scotland",y:"VPD",p:"Measles",n:"UK surveillance."},{t:"Norway",y:"Arbovirus",p:"Tick-borne Encephalitis (TBE)",n:"Endemic coastal S/E."},{t:"Sweden",y:"Arbovirus",p:"Tick-borne Encephalitis (TBE)",n:"Highest in Europe."},{t:"Sweden",y:"VPD",p:"Measles",n:"Sporadic."},{t:"Bosnia and Herzegovina",y:"Arbovirus",p:"West Nile Virus (WNV)",n:"Endemic Balkans."},{t:"T\u00fcrkiye",y:"VHF",p:"Crimean-Congo Haemorrhagic Fever (CCHF)",n:"~400\u2013500 cases/yr."},{t:"T\u00fcrkiye",y:"Arbovirus",p:"West Nile Virus (WNV)",n:"Seasonal Thrace."},{t:"Colombia",y:"Arbovirus",p:"Chikungunya",n:"Sporadic."},{t:"Colombia",y:"Arbovirus",p:"Oropouche",n:"Autochthonous; increased vs 2025."},{t:"Colombia",y:"Arbovirus",p:"Yellow fever",n:"34 cases, 18 deaths Apr 2026."},{t:"France",y:"Arbovirus",p:"Chikungunya",n:"156 local cases 2025. Closed."},{t:"Brazil",y:"Arbovirus",p:"Chikungunya",n:"Major 2025 resurgence. ECSA."},{t:"Brazil",y:"VPD",p:"Measles",n:"Second case in Rio."},{t:"Paraguay",y:"Arbovirus",p:"Chikungunya ECSA genotype",n:"Sustained 2025 outbreak."},{t:"Haiti",y:"Bacterial",p:"Cholera",n:"Enhanced surveillance."},{t:"Cape Verde",y:"Arbovirus",p:"Dengue",n:""},{t:"Cape Verde",y:"Arbovirus",p:"Emerging arboviruses",n:""},{t:"Ecuador",y:"Arbovirus",p:"Dengue",n:"Regional circulation."},{t:"Ecuador",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"First import Apr 5 2026."},{t:"DR Congo",y:"VHF",p:"Ebola",n:"Last outbreak 2025."},{t:"DR Congo",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"Epidemic declared over Apr 4."},{t:"Ghana",y:"VHF",p:"Marburg",n:"Last outbreak 2022."},{t:"Ghana",y:"Orthopoxvirus",p:"Mpox clade II",n:"Sustained transmission."},{t:"Japan",y:"VPD",p:"Measles",n:"152 cases Mar 2026."},{t:"Canada",y:"VPD",p:"Measles",n:"650+ cases."},{t:"Canada",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"Travel-linked; 2 in 6 wks."},{t:"Tunisia",y:"Arbovirus",p:"Mediterranean arbovirus risk",n:""},{t:"Egypt",y:"Respiratory/Zoonotic",p:"MERS-CoV",n:"Endemic."},{t:"Egypt",y:"Arbovirus",p:"Seasonal arboviruses",n:""},{t:"Iraq",y:"Respiratory/Zoonotic",p:"MERS-CoV",n:"Regional."},{t:"Saudi Arabia",y:"Respiratory/Zoonotic",p:"MERS-CoV",n:"Endemic; mass gathering surveillance."},{t:"Iran",y:"Respiratory/Zoonotic",p:"MERS-CoV circulation",n:"Seasonal."},{t:"Senegal",y:"Orthopoxvirus",p:"Mpox",n:"First detection 2026."},{t:"South Africa",y:"Orthopoxvirus",p:"Mpox clade I",n:"Travel-related."},{t:"Qatar",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"Travel-related."},{t:"Portugal",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"1 case in 6 wks."},{t:"England",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"10 cases in 6 wks."},{t:"Belgium",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"2 cases in 6 wks."},{t:"Austria",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"2 cases in 6 wks."},{t:"Czechia",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"3 cases in 6 wks."},{t:"Spain",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"18 cases in 6 wks."},{t:"Argentina",y:"Orthopoxvirus",p:"Mpox clade Ib",n:"2 cases in 6 wks."},{t:"Argentina",y:"Arbovirus",p:"Seasonal arbovirus",n:""},{t:"Panama",y:"Arbovirus",p:"Oropuche",n:"Detected."},{t:"Uruguay",y:"Arbovirus",p:"Seasonal arbovirus",n:""},{t:"Morocco",y:"Arbovirus",p:"Seasonal arbovirus",n:""},{t:"Algeria",y:"Arbovirus",p:"Seasonal arbovirus",n:""},{t:"Mexico",y:"Arbovirus",p:"Dengue",n:"Highly endemic. Record 2025."},{t:"Mexico",y:"Arbovirus",p:"Zika",n:"Sporadic."},{t:"Mexico",y:"Arbovirus",p:"Oropouche",n:"Regional expansion."},{t:"Mexico",y:"Arbovirus",p:"Chikungunya",n:"Co-circulates with dengue."},
+];
+const RISKS=RR.map(r=>{const n=np(r.p);return{...r,np:n,pri:isP(n),ref:REFS[r.t+"|"+r.p]||""}});
+
+const TMS=[
+{g:"A",t:"Mexico",c:"CONCACAF",ci:["Mexico City","Guadalajara"]},{g:"A",t:"South Africa",c:"CAF",ci:["Mexico City","Atlanta","Monterrey"]},{g:"A",t:"Korea",c:"AFC",ci:["Guadalajara","Monterrey"]},{g:"A",t:"Czech Republic",c:"UEFA",ci:["Guadalajara","Atlanta","Mexico City"]},{g:"B",t:"Canada",c:"CONCACAF",ci:["Toronto","Vancouver"]},{g:"B",t:"Bosnia and Herzegovina",c:"UEFA",ci:["Toronto","Los Angeles","Seattle"]},{g:"B",t:"Qatar",c:"AFC",ci:["San Francisco Bay Area","Vancouver","Seattle"]},{g:"B",t:"Switzerland",c:"UEFA",ci:["San Francisco Bay Area","Los Angeles","Vancouver"]},{g:"C",t:"Brazil",c:"CONMEBOL",ci:["New York/New Jersey","Philadelphia","Miami"]},{g:"C",t:"Morocco",c:"CAF",ci:["New York/New Jersey","Boston","Atlanta"]},{g:"C",t:"Haiti",c:"CONCACAF",ci:["Boston","Philadelphia","Atlanta"]},{g:"C",t:"Scotland",c:"UEFA",ci:["Boston","Miami"]},{g:"D",t:"United States",c:"CONCACAF",ci:["Los Angeles","Seattle"]},{g:"D",t:"Paraguay",c:"CONMEBOL",ci:["Los Angeles","San Francisco Bay Area"]},{g:"D",t:"Australia",c:"AFC",ci:["Vancouver","Seattle","San Francisco Bay Area"]},{g:"D",t:"Turkey",c:"UEFA",ci:["Vancouver","San Francisco Bay Area","Los Angeles"]},{g:"E",t:"Germany",c:"UEFA",ci:["Houston","Toronto","New York/New Jersey"]},{g:"E",t:"Cura\u00e7ao",c:"CONCACAF",ci:["Houston","Kansas City","Philadelphia"]},{g:"E",t:"Ivory Coast",c:"CAF",ci:["Philadelphia","Toronto"]},{g:"E",t:"Ecuador",c:"CONMEBOL",ci:["Philadelphia","Kansas City","New York/New Jersey"]},{g:"F",t:"Netherlands",c:"UEFA",ci:["Dallas","Houston","Kansas City"]},{g:"F",t:"Japan",c:"AFC",ci:["Dallas","Monterrey"]},{g:"F",t:"Sweden",c:"UEFA",ci:["Monterrey","Houston","Dallas"]},{g:"F",t:"Tunisia",c:"CAF",ci:["Monterrey","Kansas City"]},{g:"G",t:"Belgium",c:"UEFA",ci:["Seattle","Los Angeles","Vancouver"]},{g:"G",t:"Egypt",c:"CAF",ci:["Seattle","Vancouver"]},{g:"G",t:"Iran",c:"AFC",ci:["Los Angeles","Seattle"]},{g:"G",t:"New Zealand",c:"OFC",ci:["Los Angeles","Vancouver"]},{g:"H",t:"Spain",c:"UEFA",ci:["Atlanta","Guadalajara"]},{g:"H",t:"Cape Verde",c:"CAF",ci:["Atlanta","Miami","Houston"]},{g:"H",t:"Saudi Arabia",c:"AFC",ci:["Miami","Atlanta","Houston"]},{g:"H",t:"Uruguay",c:"CONMEBOL",ci:["Miami","Guadalajara"]},{g:"I",t:"France",c:"UEFA",ci:["New York/New Jersey","Philadelphia","Boston"]},{g:"I",t:"Senegal",c:"CAF",ci:["New York/New Jersey","Toronto"]},{g:"I",t:"Iraq",c:"AFC",ci:["Boston","Philadelphia","Toronto"]},{g:"I",t:"Norway",c:"UEFA",ci:["Boston","New York/New Jersey"]},{g:"J",t:"Argentina",c:"CONMEBOL",ci:["Kansas City","Dallas"]},{g:"J",t:"Algeria",c:"CAF",ci:["Kansas City","San Francisco Bay Area"]},{g:"J",t:"Austria",c:"UEFA",ci:["San Francisco Bay Area","Dallas","Kansas City"]},{g:"J",t:"Jordan",c:"AFC",ci:["San Francisco Bay Area","Dallas"]},{g:"K",t:"Portugal",c:"UEFA",ci:["Houston","Miami"]},{g:"K",t:"DRC",c:"CAF",ci:["Houston","Guadalajara","Atlanta"]},{g:"K",t:"Uzbekistan",c:"AFC",ci:["Mexico City","Houston","Atlanta"]},{g:"K",t:"Colombia",c:"CONMEBOL",ci:["Mexico City","Guadalajara","Miami"]},{g:"L",t:"England",c:"UEFA",ci:["Dallas","Boston","New York/New Jersey"]},{g:"L",t:"Croatia",c:"UEFA",ci:["Dallas","Toronto","Philadelphia"]},{g:"L",t:"Ghana",c:"CAF",ci:["Toronto","Boston","Philadelphia"]},{g:"L",t:"Panama",c:"CONCACAF",ci:["Toronto","New York/New Jersey"]},
+];
+
+const ST=[
+{s:"AT&T Stadium",ct:"Dallas",st:"TX",cap:94000,m:9,d:"5 group + 2 R32 + 1 R16 + 1 SF",la:32.7473,ln:-97.0945},{s:"MetLife Stadium",ct:"New York/New Jersey",st:"NJ",cap:82500,m:8,d:"4 group + 1 R32 + 1 R16 + 1 QF + Final",la:40.8128,ln:-74.0742},{s:"Mercedes-Benz Stadium",ct:"Atlanta",st:"GA",cap:75000,m:8,d:"5 group + 1 R32 + 1 R16 + 1 SF",la:33.7553,ln:-84.4006},{s:"Arrowhead Stadium",ct:"Kansas City",st:"MO",cap:73000,m:6,d:"4 group + 1 R32 + 1 QF",la:39.0489,ln:-94.4839},{s:"NRG Stadium",ct:"Houston",st:"TX",cap:72000,m:7,d:"4 group + 1 R32 + 1 R16 + 3rd place",la:29.6847,ln:-95.4107},{s:"Levi's Stadium",ct:"San Francisco Bay Area",st:"CA",cap:71000,m:6,d:"4 group + 1 R32 + 1 R16",la:37.4033,ln:-121.9694},{s:"SoFi Stadium",ct:"Los Angeles",st:"CA",cap:70000,m:8,d:"4 group + 2 R32 + 1 R16 + 1 QF",la:33.9535,ln:-118.3392},{s:"Lincoln Financial Field",ct:"Philadelphia",st:"PA",cap:69000,m:6,d:"4 group + 1 R32 + 1 R16",la:39.9008,ln:-75.1674},{s:"Lumen Field",ct:"Seattle",st:"WA",cap:69000,m:6,d:"4 group + 1 R32 + 1 R16",la:47.5952,ln:-122.3316},{s:"Hard Rock Stadium",ct:"Miami",st:"FL",cap:65000,m:7,d:"4 group + 1 R32 + 1 QF + 3rd place",la:25.958,ln:-80.2389},{s:"Gillette Stadium",ct:"Boston",st:"MA",cap:64000,m:6,d:"4 group + 1 R32 + 1 QF",la:42.0909,ln:-71.2643},
+];
+
+const INS={"Dengue":{i:"Likely",o:"Possible",e:"Uncertain",n:"Routine importation; increased travel from endemic regions. Competent vectors in CA, GA, FL, TX."},"Measles":{i:"Possible",o:"Possible",e:"Possible",n:"Declining vaccination; domestic and international introduction risk."},"Mpox Clade I":{i:"Possible",o:"Possible",e:"Possible",n:"Ongoing Central/Eastern Africa transmission. Close-contact dynamics at large events."},"Norovirus":{i:"Unlikely",o:"Likely",e:"Unlikely",n:"Already endemic. Mass gathering density may amplify outbreaks."},"Novel Respiratory Viruses":{i:"Uncertain",o:"Uncertain",e:"Uncertain",n:"No specific threats identified. Increased travel may elevate general risk."},"Oropouche":{i:"Uncertain",o:"Uncertain",e:"Uncertain",n:"Emerging in South/Central America. Competent vectors present in US."},"Chikungunya":{i:"Possible",o:"Possible",e:"Unlikely",n:"History of introduction; current global resurgence (ECSA genotype)."},"Cholera":{i:"Possible",o:"Unlikely",e:"Unlikely",n:"Limited introduction risk; public health controls limit onward transmission."},"Ebola":{i:"Unlikely",o:"Possible",e:"Unlikely",n:"Extremely low incremental risk. High impact if introduced."},"MERS-CoV":{i:"Unlikely",o:"Unlikely",e:"Unlikely",n:"Sporadic; no current outbreaks."},"West Nile Virus":{i:"Unlikely",o:"Unlikely",e:"Unlikely",n:"Already endemic. Domestic travel drives risk."},"TBE":{i:"Unlikely",o:"Unlikely",e:"Unlikely",n:"Tick-borne; unlikely in WC context."},"CCHF":{i:"Unlikely",o:"Unlikely",e:"Unlikely",n:"Tick-borne; unlikely in WC context."},"Zika":{i:"Unlikely",o:"Possible",e:"Uncertain",n:"Low global prevalence."},"Yellow Fever":{i:"Unlikely",o:"Unlikely",e:"Unlikely",n:"Low prevalence; vaccine-derived immunity."},"Mpox Clade II":{i:"Possible",o:"Possible",e:"Unlikely",n:"Ongoing regional clusters. Residual immunity."},"Mpox (unspecified)":{i:"Possible",o:"Possible",e:"Unlikely",n:"Clade identification ongoing."},"Marburg":{i:"Unlikely",o:"Possible",e:"Unlikely",n:"Rare. No recent active outbreaks."},"Nipah":{i:"Unlikely",o:"Unlikely",e:"Unlikely",n:"Extremely low human-to-human transmission."},"Seasonal Arboviruses":{i:"Unlikely",o:"Unlikely",e:"Unlikely",n:"Background seasonal patterns."}};
+const CC={UEFA:"#3266ad",CAF:"#b8860b",CONMEBOL:"#2e8b57",CONCACAF:"#8b2252",AFC:"#d05538",OFC:"#6a5acd"};
+const GC={"Mexico":[23.6,-102.5],"South Africa":[-30.6,22.9],"Korea":[35.9,127.8],"Czech Republic":[49.8,15.5],"Czechia":[49.8,15.5],"Canada":[56.1,-106.3],"Bosnia and Herzegovina":[43.9,17.7],"Qatar":[25.4,51.2],"Switzerland":[46.8,8.2],"Brazil":[-14.2,-51.9],"Morocco":[31.8,-7.1],"Haiti":[19,-72.4],"Scotland":[56.5,-4.2],"United States":[39.8,-98.6],"Paraguay":[-23.4,-58.4],"Australia":[-25.3,133.8],"Turkey":[38.9,35.2],"T\u00fcrkiye":[38.9,35.2],"Germany":[51.2,10.5],"Cura\u00e7ao":[12.2,-68.9],"Ivory Coast":[7.5,-5.5],"Ecuador":[-1.8,-78.2],"Netherlands":[52.1,5.3],"Japan":[36.2,138.3],"Sweden":[60.1,18.6],"Tunisia":[33.9,9.5],"Belgium":[50.5,4.5],"Egypt":[26.8,30.8],"Iran":[32.4,53.7],"New Zealand":[-40.9,174.9],"Spain":[40.5,-3.7],"Cape Verde":[16,-24],"Saudi Arabia":[23.9,45.1],"Uruguay":[-32.5,-55.8],"France":[46.2,2.2],"Senegal":[14.5,-14.5],"Iraq":[33.2,43.7],"Norway":[60.5,8.5],"Argentina":[-38.4,-63.6],"Algeria":[28,1.7],"Austria":[47.5,14.6],"Jordan":[30.6,36.2],"Portugal":[39.4,-8.2],"DRC":[-4,21.8],"DR Congo":[-4,21.8],"Uzbekistan":[41.4,64.6],"Colombia":[4.6,-74.3],"England":[52.4,-1.2],"Croatia":[45.1,15.2],"Ghana":[7.9,-1],"Panama":[8.5,-80.8]};
+
+function gtr(tm){const r=rt(tm);return RISKS.filter(x=>x.t===r||x.t===tm)}
+function gct(c){return TMS.filter(t=>t.ci.includes(c))}
+function gcrp(c){const a=[];gct(c).forEach(t=>{gtr(t.t).forEach(r=>a.push({...r,ft:t.t,gr:t.g}))});return a}
+function gcpc(c){return new Set(gcrp(c).filter(r=>r.pri).map(r=>r.np)).size}
+function gusc(td){return td.ci.filter(c=>ST.some(s=>s.ct===c))}
+function cpc(c){const p=gcpc(c);return p===0?"#eaeceb":p===1?"#c8e6d9":p===2?"#5ec49e":"#1d9e75"}
+function tpc(tm){const p=new Set(gtr(tm).filter(r=>r.pri).map(r=>r.np)).size;return p===0?"#eaeceb":p===1?"#c8e6d9":p===2?"#5ec49e":"#1d9e75"}
+function rbd(r){return`<span class="rb r-${(r||"unlikely").toLowerCase()}">${r}</span>`}
+function cs(c){return c.replace("San Francisco Bay Area","SF Bay").replace("New York/New Jersey","NY/NJ")}
+function refA(u){if(!u)return"";const d=u.replace(/https?:\/\//,"").split("/")[0].replace("www.","").split(".").slice(-2).join(".");return` <a class="ref-link" href="${u}" target="_blank">[${d}]</a>`}
+
+// Match schedule (US only)
+const MATCHES=[{"n":4,"s":"G","g":"Group D","r":"","d":"2026-06-12","tm":"6:00 p.m.","h":"United States","a":"Paraguay","ct":"Los Angeles"},{"n":5,"s":"G","g":"Group C","r":"","d":"2026-06-13","tm":"9:00 p.m.","h":"Haiti","a":"Scotland","ct":"Boston"},{"n":7,"s":"G","g":"Group C","r":"","d":"2026-06-13","tm":"6:00 p.m.","h":"Brazil","a":"Morocco","ct":"New York City"},{"n":8,"s":"G","g":"Group B","r":"","d":"2026-06-13","tm":"12:00 p.m.","h":"Qatar","a":"Switzerland","ct":"San Francisco"},{"n":9,"s":"G","g":"Group E","r":"","d":"2026-06-14","tm":"7:00 p.m.","h":"Ivory Coast","a":"Ecuador","ct":"Philadelphia"},{"n":10,"s":"G","g":"Group E","r":"","d":"2026-06-14","tm":"12:00 p.m.","h":"Germany","a":"Curacao","ct":"Houston"},{"n":11,"s":"G","g":"Group F","r":"","d":"2026-06-14","tm":"3:00 p.m.","h":"Netherlands","a":"Japan","ct":"Dallas"},{"n":13,"s":"G","g":"Group H","r":"","d":"2026-06-15","tm":"6:00 p.m.","h":"Saudi Arabia","a":"Uruguay","ct":"Miami"},{"n":14,"s":"G","g":"Group H","r":"","d":"2026-06-15","tm":"12:00 p.m.","h":"Spain","a":"Cape Verde","ct":"Atlanta"},{"n":15,"s":"G","g":"Group G","r":"","d":"2026-06-15","tm":"6:00 p.m.","h":"Iran","a":"New Zealand","ct":"Los Angeles"},{"n":16,"s":"G","g":"Group G","r":"","d":"2026-06-15","tm":"12:00 p.m.","h":"Belgium","a":"Egypt","ct":"Seattle"},{"n":17,"s":"G","g":"Group I","r":"","d":"2026-06-16","tm":"3:00 p.m.","h":"France","a":"Senegal","ct":"New York City"},{"n":18,"s":"G","g":"Group I","r":"","d":"2026-06-16","tm":"6:00 p.m.","h":"Iraq","a":"Norway","ct":"Boston"},{"n":19,"s":"G","g":"Group J","r":"","d":"2026-06-16","tm":"8:00 p.m.","h":"Argentina","a":"Algeria","ct":"Kansas City"},{"n":20,"s":"G","g":"Group J","r":"","d":"2026-06-16","tm":"9:00 p.m.","h":"Austria","a":"Jordan","ct":"San Francisco"},{"n":22,"s":"G","g":"Group L","r":"","d":"2026-06-17","tm":"3:00 p.m.","h":"England","a":"Croatia","ct":"Dallas"},{"n":23,"s":"G","g":"Group K","r":"","d":"2026-06-17","tm":"12:00 p.m.","h":"Portugal","a":"DR Congo","ct":"Houston"},{"n":25,"s":"G","g":"Group A","r":"","d":"2026-06-18","tm":"12:00 p.m.","h":"Czech Republic","a":"South Africa","ct":"Atlanta"},{"n":26,"s":"G","g":"Group B","r":"","d":"2026-06-18","tm":"12:00 p.m.","h":"Switzerland","a":"Bosnia and Herzegovina","ct":"Los Angeles"},{"n":29,"s":"G","g":"Group C","r":"","d":"2026-06-19","tm":"8:30 p.m.","h":"Brazil","a":"Haiti","ct":"Philadelphia"},{"n":30,"s":"G","g":"Group C","r":"","d":"2026-06-19","tm":"6:00 p.m.","h":"Scotland","a":"Morocco","ct":"Boston"},{"n":31,"s":"G","g":"Group D","r":"","d":"2026-06-19","tm":"8:00 p.m.","h":"Turkey","a":"Paraguay","ct":"San Francisco"},{"n":32,"s":"G","g":"Group D","r":"","d":"2026-06-19","tm":"12:00 p.m.","h":"United States","a":"Australia","ct":"Seattle"},{"n":34,"s":"G","g":"Group E","r":"","d":"2026-06-20","tm":"7:00 p.m.","h":"Ecuador","a":"Curacao","ct":"Kansas City"},{"n":35,"s":"G","g":"Group F","r":"","d":"2026-06-20","tm":"12:00 p.m.","h":"Netherlands","a":"Sweden","ct":"Houston"},{"n":37,"s":"G","g":"Group H","r":"","d":"2026-06-21","tm":"6:00 p.m.","h":"Uruguay","a":"Cape Verde","ct":"Miami"},{"n":38,"s":"G","g":"Group H","r":"","d":"2026-06-21","tm":"12:00 p.m.","h":"Spain","a":"Saudi Arabia","ct":"Atlanta"},{"n":39,"s":"G","g":"Group G","r":"","d":"2026-06-21","tm":"12:00 p.m.","h":"Belgium","a":"Iran","ct":"Los Angeles"},{"n":41,"s":"G","g":"Group I","r":"","d":"2026-06-22","tm":"8:00 p.m.","h":"Norway","a":"Senegal","ct":"New York City"},{"n":42,"s":"G","g":"Group I","r":"","d":"2026-06-22","tm":"5:00 p.m.","h":"France","a":"Iraq","ct":"Philadelphia"},{"n":43,"s":"G","g":"Group J","r":"","d":"2026-06-22","tm":"12:00 p.m.","h":"Argentina","a":"Austria","ct":"Dallas"},{"n":44,"s":"G","g":"Group J","r":"","d":"2026-06-22","tm":"8:00 p.m.","h":"Jordan","a":"Algeria","ct":"San Francisco"},{"n":45,"s":"G","g":"Group L","r":"","d":"2026-06-23","tm":"4:00 p.m.","h":"England","a":"Ghana","ct":"Boston"},{"n":47,"s":"G","g":"Group K","r":"","d":"2026-06-23","tm":"12:00 p.m.","h":"Portugal","a":"Uzbekistan","ct":"Houston"},{"n":49,"s":"G","g":"Group C","r":"","d":"2026-06-24","tm":"6:00 p.m.","h":"Scotland","a":"Brazil","ct":"Miami"},{"n":50,"s":"G","g":"Group C","r":"","d":"2026-06-24","tm":"6:00 p.m.","h":"Morocco","a":"Haiti","ct":"Atlanta"},{"n":52,"s":"G","g":"Group B","r":"","d":"2026-06-24","tm":"12:00 p.m.","h":"Bosnia and Herzegovina","a":"Qatar","ct":"Seattle"},{"n":55,"s":"G","g":"Group E","r":"","d":"2026-06-25","tm":"4:00 p.m.","h":"Curacao","a":"Ivory Coast","ct":"Philadelphia"},{"n":56,"s":"G","g":"Group E","r":"","d":"2026-06-25","tm":"4:00 p.m.","h":"Ecuador","a":"Germany","ct":"New York City"},{"n":57,"s":"G","g":"Group F","r":"","d":"2026-06-25","tm":"6:00 p.m.","h":"Japan","a":"Sweden","ct":"Dallas"},{"n":58,"s":"G","g":"Group F","r":"","d":"2026-06-25","tm":"6:00 p.m.","h":"Tunisia","a":"Netherlands","ct":"Kansas City"},{"n":59,"s":"G","g":"Group D","r":"","d":"2026-06-25","tm":"7:00 p.m.","h":"Turkey","a":"United States","ct":"Los Angeles"},{"n":60,"s":"G","g":"Group D","r":"","d":"2026-06-25","tm":"7:00 p.m.","h":"Paraguay","a":"Australia","ct":"San Francisco"},{"n":61,"s":"G","g":"Group I","r":"","d":"2026-06-26","tm":"3:00 p.m.","h":"Norway","a":"France","ct":"Boston"},{"n":63,"s":"G","g":"Group G","r":"","d":"2026-06-26","tm":"8:00 p.m.","h":"Egypt","a":"Iran","ct":"Seattle"},{"n":65,"s":"G","g":"Group H","r":"","d":"2026-06-26","tm":"7:00 p.m.","h":"Cape Verde","a":"Saudi Arabia","ct":"Houston"},{"n":67,"s":"G","g":"Group L","r":"","d":"2026-06-27","tm":"5:00 p.m.","h":"Panama","a":"England","ct":"New York City"},{"n":68,"s":"G","g":"Group L","r":"","d":"2026-06-27","tm":"5:00 p.m.","h":"Croatia","a":"Ghana","ct":"Philadelphia"},{"n":69,"s":"G","g":"Group J","r":"","d":"2026-06-27","tm":"9:00 p.m.","h":"Algeria","a":"Austria","ct":"Kansas City"},{"n":70,"s":"G","g":"Group J","r":"","d":"2026-06-27","tm":"9:00 p.m.","h":"Jordan","a":"Argentina","ct":"Dallas"},{"n":71,"s":"G","g":"Group K","r":"","d":"2026-06-27","tm":"7:30 p.m.","h":"Colombia","a":"Portugal","ct":"Miami"},{"n":72,"s":"G","g":"Group K","r":"","d":"2026-06-27","tm":"7:30 p.m.","h":"DR Congo","a":"Uzbekistan","ct":"Atlanta"},{"n":73,"s":"K","g":"","r":"Round of 32","d":"2026-06-28","tm":"12:00 p.m.","h":"Runner-up Group A","a":"Runner-up Group B","ct":"Los Angeles"},{"n":74,"s":"K","g":"","r":"Round of 32","d":"2026-06-29","tm":"4:30 p.m.","h":"Winner Group E","a":"3rd Group A/B/C/D/F","ct":"Boston"},{"n":76,"s":"K","g":"","r":"Round of 32","d":"2026-06-29","tm":"12:00 p.m.","h":"Winner Group C","a":"Runner-up Group F","ct":"Houston"},{"n":77,"s":"K","g":"","r":"Round of 32","d":"2026-06-30","tm":"5:00 p.m.","h":"Winner Group I","a":"3rd Group C/D/F/G/H","ct":"New York City"},{"n":78,"s":"K","g":"","r":"Round of 32","d":"2026-06-30","tm":"12:00 p.m.","h":"Runner-up Group E","a":"Runner-up Group I","ct":"Dallas"},{"n":80,"s":"K","g":"","r":"Round of 32","d":"2026-07-01","tm":"12:00 p.m.","h":"Winner Group L","a":"3rd Group E/H/I/J/K","ct":"Atlanta"},{"n":81,"s":"K","g":"","r":"Round of 32","d":"2026-07-01","tm":"5:00 p.m.","h":"Winner Group D","a":"3rd Group B/E/F/I/J","ct":"San Francisco"},{"n":82,"s":"K","g":"","r":"Round of 32","d":"2026-07-01","tm":"1:00 p.m.","h":"Winner Group G","a":"3rd Group A/E/H/I/J","ct":"Seattle"},{"n":84,"s":"K","g":"","r":"Round of 32","d":"2026-07-02","tm":"12:00 p.m.","h":"Winner Group H","a":"Runner-up Group J","ct":"Los Angeles"},{"n":86,"s":"K","g":"","r":"Round of 32","d":"2026-07-03","tm":"6:00 p.m.","h":"Winner Group J","a":"Runner-up Group H","ct":"Miami"},{"n":87,"s":"K","g":"","r":"Round of 32","d":"2026-07-03","tm":"8:30 p.m.","h":"Winner Group K","a":"3rd Group D/E/I/J/L","ct":"Kansas City"},{"n":88,"s":"K","g":"","r":"Round of 32","d":"2026-07-03","tm":"1:00 p.m.","h":"Runner-up Group D","a":"Runner-up Group G","ct":"Dallas"},{"n":89,"s":"K","g":"","r":"Round of 16","d":"2026-07-04","tm":"5:00 p.m.","h":"Winner Match 74","a":"Winner Match 77","ct":"Philadelphia"},{"n":90,"s":"K","g":"","r":"Round of 16","d":"2026-07-04","tm":"12:00 p.m.","h":"Winner Match 73","a":"Winner Match 75","ct":"Houston"},{"n":91,"s":"K","g":"","r":"Round of 16","d":"2026-07-05","tm":"4:00 p.m.","h":"Winner Match 76","a":"Winner Match 78","ct":"New York City"},{"n":93,"s":"K","g":"","r":"Round of 16","d":"2026-07-06","tm":"2:00 p.m.","h":"Winner Match 83","a":"Winner Match 84","ct":"Dallas"},{"n":94,"s":"K","g":"","r":"Round of 16","d":"2026-07-06","tm":"5:00 p.m.","h":"Winner Match 81","a":"Winner Match 82","ct":"Seattle"},{"n":95,"s":"K","g":"","r":"Round of 16","d":"2026-07-07","tm":"12:00 p.m.","h":"Winner Match 86","a":"Winner Match 88","ct":"Atlanta"},{"n":97,"s":"K","g":"","r":"Quarterfinals","d":"2026-07-09","tm":"4:00 p.m.","h":"Winner Match 89","a":"Winner Match 90","ct":"Boston"},{"n":98,"s":"K","g":"","r":"Quarterfinals","d":"2026-07-10","tm":"12:00 p.m.","h":"Winner Match 93","a":"Winner Match 94","ct":"Los Angeles"},{"n":99,"s":"K","g":"","r":"Quarterfinals","d":"2026-07-11","tm":"5:00 p.m.","h":"Winner Match 91","a":"Winner Match 92","ct":"Miami"},{"n":100,"s":"K","g":"","r":"Quarterfinals","d":"2026-07-11","tm":"8:00 p.m.","h":"Winner Match 95","a":"Winner Match 96","ct":"Kansas City"},{"n":101,"s":"K","g":"","r":"Semifinals","d":"2026-07-14","tm":"2:00 p.m.","h":"Winner Match 97","a":"Winner Match 98","ct":"Dallas"},{"n":102,"s":"K","g":"","r":"Semifinals","d":"2026-07-15","tm":"3:00 p.m.","h":"Winner Match 99","a":"Winner Match 100","ct":"Atlanta"},{"n":103,"s":"K","g":"","r":"Match for third place","d":"2026-07-18","tm":"5:00 p.m.","h":"Loser Match 101","a":"Loser Match 102","ct":"Miami"},{"n":104,"s":"K","g":"","r":"Final","d":"2026-07-19","tm":"3:00 p.m.","h":"Winner Match 101","a":"Winner Match 102","ct":"New York City"}];
+
+// City name mapping: match data -> dashboard
+const MCMAP={"New York City":"New York/New Jersey","San Francisco":"San Francisco Bay Area"};
+function mCity(mc){return MCMAP[mc]||mc}
+function dCity(dc){for(const[k,v]of Object.entries(MCMAP))if(v===dc)return k;return dc}
+
+function fmtDate(d){const[y,m,day]=d.split("-");const mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return mn[+m-1]+" "+parseInt(day)}
+function matchStage(m){return m.s==="G"?m.g:(m.r||"Knockout")}
+
+// Get upcoming matches for a dashboard city (up to n)
+function getUpcoming(dashCity,n){
+  const today=new Date().toISOString().slice(0,10);
+  const mc=dCity(dashCity);
+  const upcoming=MATCHES.filter(m=>m.ct===mc&&m.d>=today).slice(0,n);
+  if(upcoming.length)return upcoming;
+  // If no upcoming, return last match(es) played
+  const past=MATCHES.filter(m=>m.ct===mc&&m.d<today);
+  return past.slice(-n);
+}
+
+// Non-US group stage matches (Mexico, Canada) for complete team schedules
+const MATCHES_NONUS=[{"n":1,"s":"G","g":"Group A","r":"","d":"2026-06-11","tm":"1:00 p.m.","h":"Mexico","a":"South Africa","ct":"Mexico City"},{"n":2,"s":"G","g":"Group A","r":"","d":"2026-06-11","tm":"8:00 p.m.","h":"South Korea","a":"Czech Republic","ct":"Guadalajara"},{"n":3,"s":"G","g":"Group B","r":"","d":"2026-06-12","tm":"3:00 p.m.","h":"Canada","a":"Bosnia and Herzegovina","ct":"Toronto"},{"n":6,"s":"G","g":"Group D","r":"","d":"2026-06-13","tm":"9:00 p.m.","h":"Australia","a":"Turkey","ct":"Vancouver"},{"n":12,"s":"G","g":"Group F","r":"","d":"2026-06-14","tm":"8:00 p.m.","h":"Sweden","a":"Tunisia","ct":"Monterrey"},{"n":21,"s":"G","g":"Group L","r":"","d":"2026-06-17","tm":"7:00 p.m.","h":"Ghana","a":"Panama","ct":"Toronto"},{"n":24,"s":"G","g":"Group K","r":"","d":"2026-06-17","tm":"8:00 p.m.","h":"Uzbekistan","a":"Colombia","ct":"Mexico City"},{"n":27,"s":"G","g":"Group B","r":"","d":"2026-06-18","tm":"3:00 p.m.","h":"Canada","a":"Qatar","ct":"Vancouver"},{"n":28,"s":"G","g":"Group A","r":"","d":"2026-06-18","tm":"7:00 p.m.","h":"Mexico","a":"South Korea","ct":"Guadalajara"},{"n":33,"s":"G","g":"Group E","r":"","d":"2026-06-20","tm":"4:00 p.m.","h":"Germany","a":"Ivory Coast","ct":"Toronto"},{"n":36,"s":"G","g":"Group F","r":"","d":"2026-06-20","tm":"10:00 p.m.","h":"Tunisia","a":"Japan","ct":"Monterrey"},{"n":40,"s":"G","g":"Group G","r":"","d":"2026-06-21","tm":"6:00 p.m.","h":"New Zealand","a":"Egypt","ct":"Vancouver"},{"n":46,"s":"G","g":"Group L","r":"","d":"2026-06-23","tm":"7:00 p.m.","h":"Panama","a":"Croatia","ct":"Toronto"},{"n":48,"s":"G","g":"Group K","r":"","d":"2026-06-23","tm":"8:00 p.m.","h":"Colombia","a":"DR Congo","ct":"Guadalajara"},{"n":51,"s":"G","g":"Group B","r":"","d":"2026-06-24","tm":"12:00 p.m.","h":"Switzerland","a":"Canada","ct":"Vancouver"},{"n":53,"s":"G","g":"Group A","r":"","d":"2026-06-24","tm":"7:00 p.m.","h":"Czech Republic","a":"Mexico","ct":"Mexico City"},{"n":54,"s":"G","g":"Group A","r":"","d":"2026-06-24","tm":"7:00 p.m.","h":"South Africa","a":"South Korea","ct":"Monterrey"},{"n":62,"s":"G","g":"Group I","r":"","d":"2026-06-26","tm":"3:00 p.m.","h":"Senegal","a":"Iraq","ct":"Toronto"},{"n":64,"s":"G","g":"Group G","r":"","d":"2026-06-26","tm":"8:00 p.m.","h":"New Zealand","a":"Belgium","ct":"Vancouver"},{"n":66,"s":"G","g":"Group H","r":"","d":"2026-06-26","tm":"6:00 p.m.","h":"Uruguay","a":"Spain","ct":"Guadalajara"}];
+const ALL_MATCHES=MATCHES.concat(MATCHES_NONUS).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.n-b.n);
+
+// Team name mapping: dashboard name -> match data name
+const TMMAP={"Cura\u00e7ao":"Curacao","Korea":"South Korea","DRC":"DR Congo"};
+function mTeam(t){return TMMAP[t]||t}
+
+// Get upcoming matches for a team (up to n) - uses ALL matches including non-US
+function getTeamUpcoming(teamName,n){
+  const today=new Date().toISOString().slice(0,10);
+  const mt=mTeam(teamName);
+  const upcoming=ALL_MATCHES.filter(m=>(m.h===mt||m.a===mt||m.h===teamName||m.a===teamName)&&m.d>=today).slice(0,n);
+  if(upcoming.length)return upcoming;
+  const past=ALL_MATCHES.filter(m=>(m.h===mt||m.a===mt||m.h===teamName||m.a===teamName)&&m.d<today);
+  return past.slice(-n);
+}
+
+// One-liner for tooltip
+function tipMatch(ms){
+  if(!ms.length)return"";
+  const m=ms[0];
+  const past=m.d<new Date().toISOString().slice(0,10);
+  return`<div class="tt-match">${past?"Last":"Next"}: ${fmtDate(m.d)}, ${m.h} vs ${m.a}, ${m.tm}</div>`;
+}
+
+// Match box HTML for side panel
+function matchBoxHTML(ms,isTeam){
+  if(!ms.length)return"";
+  const today=new Date().toISOString().slice(0,10);
+  const isPast=ms[0].d<today;
+  const icon=`<svg viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1"/><line x1="1" y1="5" x2="11" y2="5" stroke="currentColor" stroke-width="0.8"/><line x1="4" y1="1" x2="4" y2="3" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/><line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/></svg>`;
+  let h=`<div class="match-box"><div class="match-box-title">${icon} ${isPast?"Recent matches":"Upcoming matches"}</div>`;
+  ms.forEach(m=>{
+    h+=`<div class="match-item"><span class="match-date">${fmtDate(m.d)}</span><span class="match-teams">${m.h} vs ${m.a}</span><span class="match-time">${m.tm}</span></div>`;
+    if(isTeam)h+=`<div style="padding-left:56px;margin-top:-2px;margin-bottom:2px"><span class="match-city">${mCity(m.ct)}</span></div>`;
+  });
+  h+=`</div>`;
+  return h;
+}
+
+const IT={priflags:{t:"Priority pathogen flags",b:"Distinct city\u2013pathogen pairs where the pathogen is one of the six Insight Net priority pathogens."},venues:{t:"US venues",b:ST.map(s=>`${s.s} (${cs(s.ct)}, ${s.st})`).join(" \u00b7 ")},teamlist:{t:"Teams",b:"National teams with group-stage matches at this venue."},riskprofile:{t:"Risk profile",b:"Pathogens flagged in countries of origin of teams playing here. Ratings: Unlikely, Possible, Likely, Uncertain."},survflags:{t:"Surveillance flags",b:"Active disease surveillance flags from WHO, ECDC, PAHO, and national authorities as of April 2026."},uscities:{t:"US cities",b:"US host cities where this team has group-stage matches."},withsurv:{t:"Countries with flags",b:"Countries of origin with at least one active disease surveillance flag."},withpri:{t:"Priority flags",b:"Countries with activity for at least one Insight Net priority pathogen."},dim_import:{t:"Risk of significant additional importations",b:"The extent to which World Cup-associated travel may increase the number of infectious individuals entering the United States, incorporating both relative increase and absolute additional cases compared to baseline."},dim_outbreak:{t:"Potential public health impact",b:"The likelihood and scale of transmission and associated public health and healthcare system activity in the event of an importation."},dim_endemic:{t:"Risk of establishment (endemicity)",b:"The potential for an introduced pathogen to become established in the United States with sustained transmission beyond the initial introduction period."}};
+function ii(k,r){return`<span class="ii" onclick="ti(this)" data-k="${k}"><i>i</i><div class="ip${r?' rt':''}" onclick="event.stopPropagation()"></div></span>`}
+function ti(el){const w=el.classList.contains("open");document.querySelectorAll(".ii.open").forEach(x=>x.classList.remove("open"));if(!w){const i=IT[el.dataset.k];if(i)el.querySelector(".ip").innerHTML=`<div class="ipt">${i.t}</div>${i.b}`;el.classList.add("open")}}
+document.addEventListener("click",e=>{if(!e.target.closest(".ii"))document.querySelectorAll(".ii.open").forEach(x=>x.classList.remove("open"))});
+
+let V="us",selC="Philadelphia",selT="Colombia",gUS=null,gW=null;
+const TAB_DEF=[{id:"us",label:"US cities"},{id:"world",label:"World teams"},{id:"assess",label:"Risk assessment"},{id:"map",label:"Team \u2013 city mapping"},{id:"howto",label:"How to read"},{id:"about",label:"About"}];
+document.getElementById("tabs").innerHTML=TAB_DEF.map((t,i)=>`<button class="tab${i===0?' on':''}" data-v="${t.id}" onclick="sw('${t.id}')">${t.label}</button>`).join("");
+const PREF_HTML=`<div class="pref"><div class="pref-t">Insight Net priority pathogens (modified Delphi consensus)</div><div class="pref-pills">${PP.map(p=>`<span class="pp"><span class="ppd"></span>${p}</span>`).join("")}</div><div class="pref-n">Assessed across three risk categories: significant additional importations, outbreak requiring public health response, and establishment as newly endemic disease.</div></div>`;
+
+function sw(v){V=v;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.v===v));document.querySelectorAll(".view").forEach(el=>el.classList.remove("active"));document.getElementById("v-"+v).classList.add("active");ren()}
+Promise.all([d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"),d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")]).then(([u,w])=>{gUS=u;gW=w;ren()});
+function ren(){if(V==="us")renUSView();else if(V==="world")renWorldView();else if(V==="assess")renAssess();else if(V==="map")renMapping();else if(V==="howto")renHowTo();else if(V==="about")renAbout()}
+
+function renUSView(){
+  const ps=new Set();ST.forEach(s=>gcrp(s.ct).filter(r=>r.pri).forEach(r=>ps.add(s.ct+"|"+r.np)));
+  document.getElementById("v-us").innerHTML=`<div class="mn"><div><div class="mw" id="mc-us"><svg id="ms-us"></svg><div class="tt" id="tip-us"></div></div><div class="leg" id="leg-us"></div>${PREF_HTML}</div><div class="sp"><div class="sp-top"><div class="sp-box"><div class="sp-box-l">Venues ${ii('venues')}</div><div class="sp-box-v">${ST.length}</div></div><div class="sp-box"><div class="sp-box-l">Priority flags ${ii('priflags',1)}</div><div class="sp-box-v am">${ps.size}</div></div></div><div class="sp-body" id="sp-us"></div></div></div>`;
+  renUSMap();
+  document.getElementById("leg-us").innerHTML=`<div class="lr"><span class="ll">Priority pathogen flags:</span>${[{l:"None",c:"#eaeceb"},{l:"1 priority",c:"#c8e6d9"},{l:"2 priority",c:"#5ec49e"},{l:"3+ priority",c:"#1d9e75"}].map(x=>`<span class="li"><span class="ls" style="background:${x.c}"></span>${x.l}</span>`).join("")}</div>`;
+  document.getElementById("sp-us").innerHTML=cpan(selC);
+}
+function renUSMap(){
+  if(!gUS)return;
+  const svg=d3.select("#ms-us").attr("viewBox","0 0 680 460");
+  const pr=d3.geoAlbersUsa().scale(870).translate([340,235]);
+  const pa=d3.geoPath(pr);
+  svg.selectAll("path").data(topojson.feature(gUS,gUS.objects.states).features).join("path").attr("class","state-p").attr("d",pa);
+  ST.forEach(s=>{
+    const pt=pr([s.ln,s.la]);if(!pt)return;
+    const[x,y]=pt,r=5+(s.cap/94000)*7,sel=selC===s.ct,col=cpc(s.ct);
+    const g=svg.append("g").style("cursor","pointer")
+      .on("mouseenter",e=>showTip("tip-us","mc-us",`<div class="ttt">${s.ct}</div><div class="tts">${s.s} \u00b7 ${s.cap.toLocaleString()}</div><div class="ttst">${gct(s.ct).length} teams \u00b7 ${gcpc(s.ct)} priority</div>${tipMatch(getUpcoming(s.ct,1))}<div class="tth">Click to view</div>`,e))
+      .on("mousemove",e=>moveTip("tip-us","mc-us",e)).on("mouseleave",()=>hideTip("tip-us"))
+      .on("click",()=>{selC=s.ct;renUSView()});
+    if(sel)g.append("circle").attr("cx",x).attr("cy",y).attr("r",r+3).attr("fill","none").attr("stroke","#085041").attr("stroke-width",1.5).attr("stroke-dasharray","3 2");
+    g.append("circle").attr("cx",x).attr("cy",y).attr("r",r).attr("fill",col).attr("stroke",sel?"#085041":"rgba(0,0,0,.15)").attr("stroke-width",sel?1.5:1);
+    g.append("text").attr("x",x).attr("y",y+r+12).attr("text-anchor","middle").attr("font-size",11).attr("fill","#5f5e5a").attr("font-family","Georgia,serif").text(cs(s.ct));
+  });
+}
+function renWorldView(){
+  const wr=TMS.filter(t=>gtr(t.t).length>0).length;
+  const wp=TMS.filter(t=>gtr(t.t).some(r=>r.pri)).length;
+  document.getElementById("v-world").innerHTML=`<div class="mn"><div><div class="mw" id="mc-w"><svg id="ms-w"></svg><div class="tt" id="tip-w"></div></div><div class="leg" id="leg-w"></div>${PREF_HTML}</div><div class="sp"><div class="sp-top"><div class="sp-box"><div class="sp-box-l">Countries with flags ${ii('withsurv')}</div><div class="sp-box-v">${wr}<span class="sub48"> / 48</span></div></div><div class="sp-box"><div class="sp-box-l">Priority flags ${ii('withpri',1)}</div><div class="sp-box-v am">${wp}</div></div></div><div class="sp-body" id="sp-w"></div></div></div>`;
+  renWMap();
+  let leg=`<div class="lr"><span class="ll">Priority flags:</span>${[{l:"None",c:"#eaeceb"},{l:"1 priority",c:"#c8e6d9"},{l:"2 priority",c:"#5ec49e"},{l:"3+ priority",c:"#1d9e75"}].map(x=>`<span class="li"><span class="ls" style="background:${x.c}"></span>${x.l}</span>`).join("")}</div>`;
+  leg+=`<div class="lr"><span class="ll">Confederation:</span>${Object.entries(CC).map(([k,v])=>`<span class="li"><span class="ls" style="background:${v};border-radius:50%"></span>${k}</span>`).join("")}</div>`;
+  document.getElementById("leg-w").innerHTML=leg;
+  document.getElementById("sp-w").innerHTML=tpan(selT);
+}
+function renWMap(){
+  if(!gW)return;
+  const svg=d3.select("#ms-w").attr("viewBox","0 0 680 390");
+  const pr=d3.geoNaturalEarth1().scale(124).translate([340,205]);
+  const pa=d3.geoPath(pr);
+  svg.selectAll("path").data(topojson.feature(gW,gW.objects.countries).features).join("path").attr("class","country-p").attr("d",pa);
+  TMS.forEach(t=>{
+    const co=GC[t.t]||GC[rt(t.t)];if(!co)return;
+    const pt=pr([co[1],co[0]]);if(!pt)return;
+    const[x,y_]=pt,rs=gtr(t.t),r=5+Math.min(rs.length,8)*1.1,sel=selT===t.t,col=tpc(t.t);
+    const g=svg.append("g").style("cursor","pointer")
+      .on("mouseenter",e=>{const pri=rs.filter(r=>r.pri);showTip("tip-w","mc-w",`<div class="ttt">${t.t}</div><div class="tts">Group ${t.g}</div><div class="ttst">${rs.length} flag${rs.length!==1?"s":""} \u00b7 ${pri.length} priority</div>${pri.length?`<div class="ttp">${pri.map(r=>`<span class="pp"><span class="ppd"></span>${r.np}</span>`).join("")}</div>`:""}${tipMatch(getTeamUpcoming(t.t,1))}<div class="tth">Click to view</div>`,e)})
+      .on("mousemove",e=>moveTip("tip-w","mc-w",e)).on("mouseleave",()=>hideTip("tip-w"))
+      .on("click",()=>{selT=t.t;renWorldView()});
+    if(sel)g.append("circle").attr("cx",x).attr("cy",y_).attr("r",r+4).attr("fill","none").attr("stroke","#085041").attr("stroke-width",1.5).attr("stroke-dasharray","3 2");
+    g.append("circle").attr("cx",x).attr("cy",y_).attr("r",r).attr("fill",col).attr("stroke",sel?"#085041":"rgba(0,0,0,.25)").attr("stroke-width",sel?1.5:1);
+    if(sel)g.append("text").attr("x",x).attr("y",y_-r-5).attr("text-anchor","middle").attr("font-size",11).attr("fill","#2c2c2a").attr("font-family","Georgia,serif").text(t.t);
+  });
+}
+function showTip(tid,mid,h,e){const t=document.getElementById(tid);t.innerHTML=h;t.classList.add("vis");moveTip(tid,mid,e)}
+function moveTip(tid,mid,e){const b=document.getElementById(mid).getBoundingClientRect();const t=document.getElementById(tid);let l=e.clientX-b.left+14,tp=e.clientY-b.top-10;if(l+240>b.width)l=e.clientX-b.left-254;if(l<4)l=4;if(tp<10)tp=10;const th=t.offsetHeight||120;if(tp+th>b.height-10)tp=b.height-th-10;if(tp<10)tp=10;t.style.left=l+"px";t.style.top=tp+"px"}
+function hideTip(tid){document.getElementById(tid).classList.remove("vis")}
+
+function cpan(c){
+  if(!c)return`<div class="ndm">Select a city on the map.</div>`;
+  const s=ST.find(x=>x.ct===c),ts=gct(c),rs=gcrp(c);
+  const pm={};rs.forEach(r=>{if(!pm[r.np])pm[r.np]={ts:[],pri:r.pri,ns:[],refs:[]};if(!pm[r.np].ts.includes(r.ft))pm[r.np].ts.push(r.ft);if(r.n)pm[r.np].ns.push({t:r.ft,n:r.n});if(r.ref&&!pm[r.np].refs.includes(r.ref))pm[r.np].refs.push(r.ref)});
+  let h=`<div class="ph"><span class="pt">${c}</span>${s?`<span class="ps">${s.st}</span>`:""}</div>`;
+  if(s)h+=`<div class="pm">${s.s} \u00b7 ${s.cap.toLocaleString()} capacity \u00b7 ${s.m} matches<br>${s.d}</div>`;
+  h+=`<div class="sl">Teams ${ii('teamlist')}</div><div class="tc">${ts.map(t=>`<span class="chip">${t.t}<span class="gt">Gr.${t.g}</span></span>`).join("")}</div>`;
+  h+=matchBoxHTML(getUpcoming(c,2),false);
+  const so=Object.entries(pm).sort((a,b)=>(b[1].pri?1:0)-(a[1].pri?1:0));
+  if(so.length){h+=`<div class="sl">Risk profile ${ii('riskprofile')}</div><div class="rcs">${so.map(([p,d])=>{const ins=INS[p];return`<div class="rc ${d.pri?"pri":""}"><div class="rch"><span class="rcn">${p}</span>${d.pri?'<span class="ptag">PRIORITY</span>':""}</div><div class="rcf">From: ${d.ts.join(", ")}${d.refs.map(u=>refA(u)).join("")}</div>${ins?`<div class="rr"><span class="rl">Imp:</span>${rbd(ins.i)}<span class="rl">Outbrk:</span>${rbd(ins.o)}<span class="rl">Endem:</span>${rbd(ins.e)}</div>`:""}${d.ns.filter(x=>x.n).map(x=>`<div class="rcno">${x.t}: ${x.n}</div>`).join("")}</div>`}).join("")}</div>`}
+  return h;
+}
+function tpan(tm){
+  if(!tm)return`<div class="ndm">Select a team on the map.</div>`;
+  const td=TMS.find(x=>x.t===tm);if(!td)return"";
+  const rs=gtr(tm),uc=gusc(td);
+  let h=`<div class="ph"><span class="pt">${tm}</span><span class="ps">Group ${td.g}</span></div>`;
+  h+=`<div class="sl" style="margin-top:10px">US cities ${ii('uscities')}</div><div class="tc">${uc.length?uc.map(c=>`<span class="chip">${c}</span>`).join(""):'<span class="ndm">Non-US venues only</span>'}</div>`;
+  h+=matchBoxHTML(getTeamUpcoming(tm,2),true);
+  if(rs.length){h+=`<div class="sl">Surveillance flags ${ii('survflags')}</div><div class="rcs">${rs.sort((a,b)=>(b.pri?1:0)-(a.pri?1:0)).map(r=>{const ins=INS[r.np];return`<div class="rc ${r.pri?"pri":""}"><div class="rch"><span class="rcn">${r.np}</span>${r.pri?'<span class="ptag">PRIORITY</span>':""}<span class="rct">${r.y}</span></div>${ins?`<div class="rr"><span class="rl">Imp:</span>${rbd(ins.i)}<span class="rl">Outbrk:</span>${rbd(ins.o)}<span class="rl">Endem:</span>${rbd(ins.e)}</div>`:""}${r.n?`<div class="rcno">${r.n}${refA(r.ref)}</div>`:r.ref?`<div class="rcno">${refA(r.ref)}</div>`:""}</div>`}).join("")}</div>`}
+  else h+='<div class="ndm">No active surveillance flags</div>';
+  return h;
+}
+function renAssess(){
+  const priP=PP;const othP=Object.keys(INS).filter(p=>!priP.includes(p)).sort();
+  let h=`<div class="tab-intro">Threat characterization from the Insight Net modified Delphi process. Priority pathogens identified by consensus as posing the highest overall risk across importation, outbreak potential, and endemicity.</div>`;
+  h+=`<div class="scroll-wrap"><table class="atbl"><thead><tr><th>Pathogen</th><th>Importation ${ii('dim_import')}</th><th>Outbreak impact ${ii('dim_outbreak')}</th><th>Endemicity ${ii('dim_endemic',1)}</th><th>Notes</th></tr></thead><tbody>`;
+  h+=`<tr class="asep"><td colspan="5">Priority pathogens</td></tr>`;
+  priP.forEach(p=>{const i=INS[p];if(!i)return;h+=`<tr class="pri-row"><td class="pname">${p} <span class="ptag">PRIORITY</span></td><td>${rbd(i.i)}</td><td>${rbd(i.o)}</td><td>${rbd(i.e)}</td><td class="notes-cell">${i.n||""}</td></tr>`});
+  h+=`<tr class="asep"><td colspan="5">Other assessed pathogens</td></tr>`;
+  othP.forEach(p=>{const i=INS[p];if(!i)return;h+=`<tr><td class="pname">${p}</td><td>${rbd(i.i)}</td><td>${rbd(i.o)}</td><td>${rbd(i.e)}</td><td class="notes-cell">${i.n||""}</td></tr>`});
+  h+=`</tbody></table></div>`;
+  document.getElementById("v-assess").innerHTML=h;
+}
+function renMapping(){
+  const groups=[..."ABCDEFGHIJKL"];
+  let h=`<div class="tab-intro">Group-stage team assignments to US host cities, with active surveillance flags. Non-US venues excluded.</div>`;
+  h+=`<div class="scroll-wrap"><table class="mtbl"><thead><tr><th>Team</th><th>US cities</th><th>Surveillance flags</th></tr></thead><tbody>`;
+  groups.forEach(g=>{
+    h+=`<tr class="grp-sep"><td colspan="3">Group ${g}</td></tr>`;
+    TMS.filter(t=>t.g===g).forEach(t=>{
+      const uc=gusc(t),rs=gtr(t.t);
+      h+=`<tr><td class="tname">${t.t}</td><td>${uc.length?uc.map(c=>`<span class="city-tag">${cs(c)}</span>`).join(""):'<span style="font-size:9px;color:var(--tx3)">non-US</span>'}</td><td>${rs.length?rs.map(r=>`<span class="flag-mini ${r.pri?"pri":"std"}">${r.np}</span>`).join(""):'<span style="font-size:9px;color:var(--tx3)">\u2014</span>'}</td></tr>`;
+    });
+  });
+  h+=`</tbody></table></div>`;
+  document.getElementById("v-map").innerHTML=h;
+}
+function renHowTo(){
+  document.getElementById("v-howto").innerHTML=`
+<div style="max-width:760px">
+
+<div class="htr-card">
+<div class="htr-stitle"><span class="htr-num">1</span><div class="htr-h">The US cities map</div></div>
+<div class="htr-p">Each circle represents a US host city. The <strong>size</strong> reflects the stadium's seating capacity. The <strong>color</strong> reflects how many priority pathogens are flagged among the teams playing at that venue. Pulsating rings indicate active surveillance monitoring. Click any city to open its full risk profile in the side panel.</div>
+<div style="background:var(--bg);border-radius:7px;padding:12px">
+<div class="htr-dots">
+  <div class="htr-dot-i"><div class="htr-dot" style="width:18px;height:18px;background:#eaeceb"></div><div class="htr-dot-l">No priority<br/>flags</div></div>
+  <div class="htr-dot-i"><div class="htr-dot" style="width:22px;height:22px;background:#c8e6d9"></div><div class="htr-dot-l">1 priority<br/>pathogen</div></div>
+  <div class="htr-dot-i"><div class="htr-dot" style="width:26px;height:26px;background:#5ec49e"></div><div class="htr-dot-l">2 priority<br/>pathogens</div></div>
+  <div class="htr-dot-i"><div class="htr-dot" style="width:30px;height:30px;background:#1d9e75"></div><div class="htr-dot-l">3+ priority<br/>pathogens</div></div>
+</div>
+</div>
+<div class="htr-note">The color does not represent an overall risk level. It shows how many of the six Insight Net priority pathogens are represented among the teams assigned to that venue.</div>
+</div>
+
+<div class="htr-card">
+<div class="htr-stitle"><span class="htr-num">2</span><div class="htr-h">Upcoming matches</div></div>
+<div class="htr-p">When you select a city or team, the side panel shows up to three upcoming matches based on today's date. This helps planners see <strong>when</strong> specific risk exposures will arrive. Hovering over a city on the map also shows the single next match in the tooltip.</div>
+<div class="htr-match">
+  <div class="htr-match-t"><svg viewBox="0 0 12 12" width="12" height="12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1"/><line x1="1" y1="5" x2="11" y2="5" stroke="currentColor" stroke-width=".8"/><line x1="4" y1="1" x2="4" y2="3" stroke="currentColor" stroke-width=".8" stroke-linecap="round"/><line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width=".8" stroke-linecap="round"/></svg> Upcoming matches</div>
+  <div class="htr-match-i"><span class="htr-md">Jun 14</span><span class="htr-mt">Ivory Coast vs Ecuador</span><span class="htr-mtm">7:00 p.m.</span></div>
+  <div class="htr-match-i"><span class="htr-md">Jun 19</span><span class="htr-mt">Brazil vs Haiti</span><span class="htr-mtm">8:30 p.m.</span></div>
+  <div class="htr-match-i"><span class="htr-md">Jun 22</span><span class="htr-mt">France vs Iraq</span><span class="htr-mtm">5:00 p.m.</span></div>
+</div>
+<div class="htr-note">After the tournament ends, the most recent matches are shown instead. The world teams view shows all matches including those in Mexico and Canada.</div>
+</div>
+
+<div class="htr-card">
+<div class="htr-stitle"><span class="htr-num">3</span><div class="htr-h">The rating scale</div></div>
+<div class="htr-p">Each pathogen is assessed across three dimensions (importation, outbreak impact, endemicity) using four ratings from the Insight Net modified Delphi process:</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0">
+  <div style="text-align:center"><span class="rb r-unlikely" style="font-size:10px;padding:2px 8px">Unlikely</span><div style="font-size:9px;color:var(--tx3);margin-top:3px">Low incremental<br/>risk from WC26</div></div>
+  <div style="font-size:14px;color:var(--tx3)">\u2192</div>
+  <div style="text-align:center"><span class="rb r-possible" style="font-size:10px;padding:2px 8px">Possible</span><div style="font-size:9px;color:var(--tx3);margin-top:3px">Plausible but<br/>not expected</div></div>
+  <div style="font-size:14px;color:var(--tx3)">\u2192</div>
+  <div style="text-align:center"><span class="rb r-likely" style="font-size:10px;padding:2px 8px">Likely</span><div style="font-size:9px;color:var(--tx3);margin-top:3px">Expected based on<br/>current patterns</div></div>
+  <div style="font-size:14px;color:var(--tx3);margin:0 4px">|</div>
+  <div style="text-align:center"><span class="rb r-uncertain" style="font-size:10px;padding:2px 8px">Uncertain</span><div style="font-size:9px;color:var(--tx3);margin-top:3px">Consensus could<br/>not be reached</div></div>
+</div>
+<div class="htr-note">Uncertain is a non-ordinal category. It means the Delphi panel could not reach agreement on placement, often because the evidence base is too thin. It is not a level between Possible and Likely.</div>
+</div>
+
+<div class="htr-card">
+<div class="htr-stitle"><span class="htr-num">4</span><div class="htr-h">Reading a risk card</div></div>
+<div class="htr-p">Each card in the risk profile represents one pathogen flagged at a city or for a team. Here is an annotated example:</div>
+<div class="htr-rc">
+  <div class="htr-rc-h"><span class="htr-rc-n">Dengue</span><span class="ptag">PRIORITY</span></div>
+  <div class="htr-rc-f">From: Cura\u00e7ao, Ivory Coast, Ecuador <span class="htr-rc-ref">[paho.org]</span></div>
+  <div class="htr-rc-badges">
+    <span class="htr-rc-rl">Import:</span><span class="rb r-likely" style="font-size:10px;padding:2px 6px">Likely</span>
+    <span class="htr-rc-rl">Outbreak:</span><span class="rb r-possible" style="font-size:10px;padding:2px 6px">Possible</span>
+    <span class="htr-rc-rl">Endemic:</span><span class="rb r-uncertain" style="font-size:10px;padding:2px 6px">Uncertain</span>
+  </div>
+  <div class="htr-rc-note">Cura\u00e7ao: Caribbean endemic. Sporadic year-round.</div>
+</div>
+<div class="htr-ann">
+  <div><strong>Pathogen name</strong> with PRIORITY tag if it is one of the six Insight Net consensus pathogens.</div>
+  <div><strong>"From:" line</strong> lists which teams playing at this venue carry the flag, with a link to the source report.</div>
+  <div><strong>Three rating badges</strong> show the Delphi assessment for importation risk, outbreak impact, and endemicity.</div>
+  <div><strong>Surveillance notes</strong> provide the latest status from WHO, ECDC, PAHO, or national authorities.</div>
+</div>
+</div>
+
+<div class="htr-card">
+<div class="htr-stitle"><span class="htr-num">5</span><div class="htr-h">The world teams map</div></div>
+<div class="htr-p">Shows all 48 teams positioned at their country of origin. Dot <strong>color</strong> reflects the number of priority pathogen flags in that country. Click a team to see its surveillance profile, US host cities, and full match schedule.</div>
+<div class="htr-note">The world teams view shows all matches for a team (including those in Mexico and Canada), while the US cities view shows only matches at US venues.</div>
+</div>
+
+<div class="htr-card">
+<div class="htr-stitle"><span class="htr-num">6</span><div class="htr-h">What this dashboard does not show</div></div>
+<div class="htr-dont">
+  <strong>Not modeled:</strong> Quantitative importation probabilities.<br/><br/>
+  <strong>Not captured:</strong> Fan travel beyond team country of origin. A Brazil match in Philadelphia will draw Brazilian fans from across the US and Latin America, not just from Brazil.<br/><br/>
+  <strong>Point-in-time:</strong> Surveillance flags reflect reporting as of April 2026 and may change as the event window approaches. The match schedule follows the official FIFA group-stage draw.<br/><br/>
+  <strong>Not a risk score:</strong> The dashboard maps pathogen presence to venues. It does not produce a single composite risk number for any city. The Insight Net ratings are expert assessments, not model outputs.
+</div>
+</div>
+
+</div>`;
+}
+function renAbout(){
+  document.getElementById("v-about").innerHTML=`<div class="about-wrap">
+<h2>Overview</h2>
+<p>This dashboard summarizes the infectious disease threat prioritization conducted by the <a href="https://insightnet.us/" target="_blank">Insight Net</a> ID Cup Collaboration Group for the FIFA 2026 World Cup events in the United States. Using a modified Delphi process, the collaboration assessed a comprehensive list of health conditions identified by public health partners, evaluating each across three risk categories.</p>
+<p>The assessment focuses on <em>excess</em> risk attributable to WC26 travel dynamics, not on whether a disease poses any theoretical risk in general.</p>
+<h2>Risk assessment framework</h2>
+<p>Each pathogen was assessed across three dimensions:</p>
+<ul>
+<li><strong>Importation risk.</strong> The extent to which WC-associated travel may increase infectious individuals entering the US, incorporating both relative increase and absolute additional cases compared to baseline.</li>
+<li><strong>Public health impact.</strong> The likelihood and scale of transmission and associated public health and healthcare system activity in the event of an importation.</li>
+<li><strong>Endemicity risk.</strong> The potential for an introduced pathogen to become established with sustained transmission.</li>
+</ul>
+<p>Ratings use four levels:</p>
+<p class="rating-key">${rbd("Unlikely")} ${rbd("Possible")} ${rbd("Likely")} ${rbd("Uncertain")}</p>
+<p>Uncertain is a distinct non-ordinal category indicating the group could not reach consensus on placement, not a level between Possible and Likely.</p>
+<h2>Priority pathogens</h2>
+<p>Six pathogens were identified with the highest overall risk consensus: Dengue, Measles, Mpox Clade I, Norovirus, Novel Respiratory Viruses, and Oropouche. These are highlighted throughout with the <span class="ptag">PRIORITY</span> tag.</p>
+<h2>Data sources</h2>
+<p>Country-level surveillance flags reflect active disease reporting as of April 2026 from WHO, ECDC, PAHO, and national health authorities. Team-to-city assignments follow the official FIFA WC26 group-stage draw. Reference links on individual flags point to the original reporting source.</p>
+<h2>Contributing centers</h2>
+<p>The <a href="https://insightnet.us/" target="_blank">Insight Net</a> ID Cup Collaboration Group includes members from the following centers and institutions:</p>
+<div class="about-grid">
+<div class="cg-item"><span class="center-name">EPISTORM</span><br><span class="center-inst">Northeastern University</span></div>
+<div class="cg-item"><span class="center-name">ACCIDDA</span><br><span class="center-inst">UNC-Chapel Hill, JHU, U. Pittsburgh, U. Florida, NIH</span></div>
+<div class="cg-item"><span class="center-name">EpiENGAGE</span><br><span class="center-inst">UT Austin, Northern Arizona U., U. Georgia</span></div>
+<div class="cg-item"><span class="center-name">ForeSITE</span><br><span class="center-inst">Washington State U., U. of Utah</span></div>
+<div class="cg-item"><span class="center-name">CORI</span><br><span class="center-inst">Johns Hopkins University</span></div>
+<div class="cg-item"><span class="center-name">C-CORE</span><br><span class="center-inst">UC Berkeley, Kaiser Permanente</span></div>
+<div class="cg-item"><span class="center-name">Resilient Shield</span><br><span class="center-inst">UC San Diego</span></div>
+<div class="cg-item"><span class="center-name">CSTE</span><br><span class="center-inst">Council of State and Territorial Epidemiologists</span></div>
+<div class="cg-item"><span class="center-name">CDC</span><br><span class="center-inst">Centers for Disease Control and Prevention</span></div>
+<div class="cg-item"><span class="center-name">IRS</span><br><span class="center-inst">International Responder Systems</span></div>
+<div class="cg-item"><span class="center-name">DOH WA</span><br><span class="center-inst">Washington State Dept. of Health</span></div>
+<div class="cg-item"><span class="center-name">CDPH</span><br><span class="center-inst">California Dept. of Public Health</span></div>
+</div>
+<h2>About this dashboard</h2>
+<p>Developed by the EPISTORM center at Northeastern University as part of the IDCUP 26 planning framework. Designed for STLT public health partners to identify which US host cities face the most complex epidemiological profiles.</p>
+<p style="font-size:11px;color:var(--tx3);margin-top:12px;font-style:italic">Funding: This project was made possible by cooperative agreement CDC-RFA-FT-23-0069 from the CDC's Center for Forecasting and Outbreak Analytics.</p>
+</div>`;
+}
+ren();
+</script>
+</body>
+</html>
